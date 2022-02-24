@@ -165,8 +165,15 @@ def loadModel():
   return model
 
 def predict(code, nl, model=loadModel()):
-  imges_l = ConvertTabToImgForRec(nl)
-  imges_r = ConvertTabToImgForRec(code)
+  df_img = convertTabularRecToImg(code, nl, 0):
+  num_row = 32    # Number of pixel rows in image representation
+  num_col = 24    # Number of pixel columns in image representation
+  num = num_row * num_col # Number of features to be included for analysis, which is also the total number of pixels in image representation
+  data_code = df_img.iloc[:, num:num+num]
+  data_nl = df_img.iloc[:, :num]
+  code_f, nl_f = transCodePairToImg(data_code, data_nl_f
+  imges_l = ConvertTabToImgForRec(nl_f)
+  imges_r = ConvertTabToImgForRec(code_f)
   imges_l = convert_to_array(imges_l)
   imges_r = convert_to_array(imges_r)
   imges_l = np.repeat(imges_l[..., np.newaxis], 3, -1)
