@@ -43,7 +43,11 @@ def get_model(input_shape, loss, optimizer, metric, epochs = 10, batch_size = 64
     sim_model.compile(loss=loss, optimizer=optimizer, metrics=metric)
 
     return sim_model
-
+  
+def ConvertTabToImgForRec(data):
+    dic = {}
+    dic[0] = data
+    return dic
 
 def ConvertTabToImg(data_path_arr):
     j = 0
@@ -154,4 +158,19 @@ def train():
     model.fit([imges_l, imges_r], y_train, epochs=50, batch_size=64)
 
     model.save(path_model_saved)
+
+   
+def loadModel():
+  model = tf.keras.models.load_model(path_model_saved)
+  return model
+
+def predict(code, nl, model=loadModel()):
+  imges_l = ConvertTabToImgForRec(nl)
+  imges_r = ConvertTabToImgForRec(code)
+  imges_l = convert_to_array(imges_l)
+  imges_r = convert_to_array(imges_r)
+  imges_l = np.repeat(imges_l[..., np.newaxis], 3, -1)
+  imges_r = np.repeat(imges_r[..., np.newaxis], 3, -1)
+  res = model.predict([imges_l, imges_r])
+  return res
 
