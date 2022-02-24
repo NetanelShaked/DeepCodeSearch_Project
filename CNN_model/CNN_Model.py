@@ -43,7 +43,11 @@ def get_model(input_shape, loss, optimizer, metric, epochs = 10, batch_size = 64
     sim_model.compile(loss=loss, optimizer=optimizer, metrics=metric)
 
     return sim_model
-
+  
+def ConvertTabToImgForRec(data):
+    dic = {}
+    dic[0] = data
+    return dic
 
 def ConvertTabToImg(data_path_arr):
     j = 0
@@ -154,4 +158,26 @@ def train():
     model.fit([imges_l, imges_r], y_train, epochs=50, batch_size=64)
 
     model.save(path_model_saved)
+
+   
+def loadModel():
+  model = tf.keras.models.load_model(path_model_saved)
+  return model
+
+def predict(code, nl, model=loadModel()):
+  df_img = convertTabularRecToImg(code, nl, 0):
+  num_row = 32    # Number of pixel rows in image representation
+  num_col = 24    # Number of pixel columns in image representation
+  num = num_row * num_col # Number of features to be included for analysis, which is also the total number of pixels in image representation
+  data_code = df_img.iloc[:, num:num+num]
+  data_nl = df_img.iloc[:, :num]
+  code_f, nl_f = transCodePairToImg(data_code, data_nl_f
+  imges_l = ConvertTabToImgForRec(nl_f)
+  imges_r = ConvertTabToImgForRec(code_f)
+  imges_l = convert_to_array(imges_l)
+  imges_r = convert_to_array(imges_r)
+  imges_l = np.repeat(imges_l[..., np.newaxis], 3, -1)
+  imges_r = np.repeat(imges_r[..., np.newaxis], 3, -1)
+  res = model.predict([imges_l, imges_r])
+  return res
 
