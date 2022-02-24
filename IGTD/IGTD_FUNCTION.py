@@ -118,6 +118,24 @@ def generate_matrix_distance_ranking(num_r, num_c, method='Euclidean'):
     coordinate = np.int64(coordinate)
     return (coordinate[:, 0], coordinate[:, 1]), ranking
 
+def transCodePairToImg(data_code, data_nl):
+    norm_data_code = min_max_transform(data_code.values)
+    norm_data_code = pd.DataFrame(norm_data_code, columns=data_code.columns, index=data_code.index)
+
+    norm_data_nl = min_max_transform(data_nl.values)
+    norm_data_nl = pd.DataFrame(norm_data_nl, columns=data_nl.columns, index=data_nl.index)
+    
+    fea_dist_method = 'Pearson'
+    image_dist_method = 'Manhattan'
+    error = 'squared'
+    result_dir = './Result/Train_2/code'
+    code_data = table_to_image(norm_data_code, [num_row, num_col], fea_dist_method, image_dist_method, save_image_size,
+                   max_step, val_step, result_dir, error, isSingle=True)
+    
+    nl_data = table_to_image(norm_data_nl, [num_row, num_col], fea_dist_method, image_dist_method, save_image_size,
+                   max_step, val_step, result_dir, error, isSingle=True)
+    
+    return code_data, nl_data
 
 def IGTD_absolute_error(source, target, max_step=1000, switch_t=0, val_step=50, min_gain=0.00001, random_state=1,
                         save_folder=None, file_name=''):
@@ -543,7 +561,7 @@ def generate_image_data(data, index, num_row, num_column, coord, image_folder=No
 
 
 def table_to_image(norm_d, scale, fea_dist_method, image_dist_method, save_image_size, max_step, val_step, normDir,
-                   error, switch_t=0, min_gain=0.00001):
+                   error, switch_t=0, min_gain=0.00001, isSingle=False):
     '''
     This function converts tabular data into images using the IGTD algorithm.
 
@@ -634,6 +652,9 @@ def table_to_image(norm_d, scale, fea_dist_method, image_dist_method, save_image
     data, samples = generate_image_data(data=norm_d, index=index[min_id, :], num_row=scale[0], num_column=scale[1],
                                         coord=coordinate, image_folder=normDir + '/data', file_name='')
 
+    if (isSingle):
+        return data
+    
     output = open(normDir + '/Results.pkl', 'wb')
     cp.dump(norm_d, output)
     cp.dump(data, output)
