@@ -12,7 +12,7 @@ import _pickle as cp
 from IGTD.IGTD_FUNCTION import table_to_image, min_max_transform
 
 
-def run():
+def run(data_path, output_path):
     num_row = 32    # Number of pixel rows in image representation
     num_col = 24    # Number of pixel columns in image representation
     num = num_row * num_col # Number of features to be included for analysis, which is also the total number of pixels in image representation
@@ -23,7 +23,7 @@ def run():
 
     # Import the example data and linearly scale each feature so that its minimum and maximum values are 0 and 1, respectively.
 
-    data = pd.read_csv('./Data/cosqa-train1.csv', low_memory=False, sep=',', engine='c', na_values=['na', '-', ''],
+    data = pd.read_csv(data_path, low_memory=False, sep=',', engine='c', na_values=['na', '-', ''],
                     header=0, index_col=0)
     data_code = data.iloc[:, num:num+num]
     data_nl = data.iloc[:, :num]
@@ -41,12 +41,12 @@ def run():
     image_dist_method = 'Euclidean'
     error = 'abs'
 
-    result_dir = './Result/Train_1/code'
+    result_dir = f'{output_path}/code'
     os.makedirs(name=result_dir, exist_ok=True)
     table_to_image(norm_data_code, [num_row, num_col], fea_dist_method, image_dist_method, save_image_size,
                    max_step, val_step, result_dir, error)
 
-    result_dir = './Result/Train_1/nl'
+    result_dir = f'{output_path}/nl'
     os.makedirs(name=result_dir, exist_ok=True)
     table_to_image(norm_data_nl, [num_row, num_col], fea_dist_method, image_dist_method, save_image_size,
                    max_step, val_step, result_dir, error)

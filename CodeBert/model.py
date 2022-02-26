@@ -24,7 +24,6 @@ def convertTabularRecToImg(code, nl, label):
         context_embeddings_code = model(torch.tensor(tokens_ids_code)[None, :])[0]
     except:
         print('error')
-        continue
 
 
     for index, embedding in enumerate([context_embeddings_nl, context_embeddings_code]):

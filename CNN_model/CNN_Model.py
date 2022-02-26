@@ -1,12 +1,13 @@
 import numpy as np
 import pandas as pd
-import pickle5 as pickle
 from tensorflow import keras
 
 from efficientnet_pytorch import EfficientNet
+from IGTD.IGTD_FUNCTION import transCodePairToImg
+from CodeBert.model import convertTabularRecToImg
 
 import numpy as np
-import pickle5 as pickle
+import pickle
 import os
 
 from tensorflow.keras import applications as efn
@@ -91,7 +92,7 @@ def loadDataFromPickle(path):
     return imges
 
 def encoder(input_shape):
-    base_model = efn.ResNet50(weights='imagenet', include_top=False, input_shape=(32,24,3))
+    base_model = efn.ResNet50(weights='imagenet', include_top=False, input_shape=(32,48,3))
 
     for layer in base_model.layers:
         if isinstance(layer, BatchNormalization):
@@ -105,39 +106,20 @@ def encoder(input_shape):
 
     return model
 
-def processDataByImage():
+def processDataByImage(path):
     ## Convert Tabular to IMG Data
-    NL_PATH = ['../IGTD/Result/Train_2/code/data/']
-    CODE_PATH = ['../IGTD/Result/Train_1/nl/data/']
-    data = ConvertTabToImg(CODE_PATH)
+    NL_PATH = [f'{path}/code/data/']
+    CODE_PATH = [f'{path}/nl/data/']
+    code_data = ConvertTabToImg(CODE_PATH)
+    nl_data = ConvertTabToImg(NL_PATH)
+    return code_data, nl_data
 
-    ## Save The Data of CODE
-    path_code_saved = './Data/pickle'
-    data_file_name = '/x_images_code_train.pickle'
-    saveDataAsPickle(data, path_code_saved + data_file_name)
+def train(data_path, path_train_csv, output_path):
+    imges_r, imges_l = processDataByImage(data_path)
 
-    ## Save The Data of NL
-    data = ConvertTabToImg(NL_PATH)
-    data_file_name = '/x_images_nl_train.pickle'
-    saveDataAsPickle(data, path_code_saved + data_file_name)
-
-def train():
-    path_nl_saved = './Data/pickle'
-    path_code_saved = './Data/pickle'
-    path_model_saved = './Data/models/model2'
-    path_train = './Data/cosqa-train1.csv'
-
-    train = pd.read_csv(path_train)
-
-    with open(path_nl_saved + '/x_images_nl_train.pickle', 'rb') as handle:
-        imges_l = pickle.load(handle)
-
-    with open(path_code_saved + '/x_images_code_train.pickle', 'rb') as handle:
-        imges_r = pickle.load(handle)
+    train = pd.read_csv(path_train_csv)
 
     y_train = train['label']
-    # imges_l = np.repeat(imges_l[..., np.newaxis], 3, -1)
-    # imges_r = np.repeat(imges_r[..., np.newaxis], 3, -1)
 
     imges_l = convert_to_array(imges_l)
     imges_r = convert_to_array(imges_r)
@@ -150,34 +132,31 @@ def train():
     optimizer = 'adam'
     metric = ['accuracy']
 
-    print(len(imges_l))
-    print(len(imges_r))
+    print(imges_l.shape)
+    print(imges_r.shape)
 
-    model = get_model(input_shape, loss, optimizer, metric)
+    model = get_model(input_shape, loss, optimizer, metric,)
 
     model.fit([imges_l, imges_r], y_train, epochs=50, batch_size=64)
 
-    model.save(path_model_saved)
+    model.save(output_path)
 
    
-def loadModel():
+def loadModel(path_model_saved):
   model = tf.keras.models.load_model(path_model_saved)
   return model
 
-def predict(code, nl, model=loadModel()):
-  df_img = convertTabularRecToImg(code, nl, 0):
-  num_row = 32    # Number of pixel rows in image representation
-  num_col = 24    # Number of pixel columns in image representation
-  num = num_row * num_col # Number of features to be included for analysis, which is also the total number of pixels in image representation
-  data_code = df_img.iloc[:, num:num+num]
-  data_nl = df_img.iloc[:, :num]
-  code_f, nl_f = transCodePairToImg(data_code, data_nl_f
-  imges_l = ConvertTabToImgForRec(nl_f)
-  imges_r = ConvertTabToImgForRec(code_f)
-  imges_l = convert_to_array(imges_l)
-  imges_r = convert_to_array(imges_r)
-  imges_l = np.repeat(imges_l[..., np.newaxis], 3, -1)
-  imges_r = np.repeat(imges_r[..., np.newaxis], 3, -1)
-  res = model.predict([imges_l, imges_r])
-  return res
+def getPredictPrepareData():
+    return None
+
+def predict(data_path, model):
+    imges_r, imges_l = processDataByImage(data_path)
+
+    imges_l = convert_to_array(imges_l)
+    imges_r = convert_to_array(imges_r)
+
+    imges_l = np.repeat(imges_l[..., np.newaxis], 3, -1)
+    imges_r = np.repeat(imges_r[..., np.newaxis], 3, -1)
+    res = model.predict([imges_l, imges_r])
+    return res
 

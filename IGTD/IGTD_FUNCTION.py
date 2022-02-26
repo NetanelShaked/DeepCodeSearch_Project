@@ -119,11 +119,16 @@ def generate_matrix_distance_ranking(num_r, num_c, method='Euclidean'):
     return (coordinate[:, 0], coordinate[:, 1]), ranking
 
 def transCodePairToImg(data_code, data_nl):
+    num_row = 32
+    num_col = 24
+    save_image_size = 3
+    max_step = 10000
+    val_step = 300
     norm_data_code = min_max_transform(data_code.values)
-    norm_data_code = pd.DataFrame(norm_data_code, columns=data_code.columns, index=data_code.index)
+    norm_data_code = pd.DataFrame(data_code, columns=data_code.columns, index=data_code.index)
 
     norm_data_nl = min_max_transform(data_nl.values)
-    norm_data_nl = pd.DataFrame(norm_data_nl, columns=data_nl.columns, index=data_nl.index)
+    norm_data_nl = pd.DataFrame(data_nl, columns=data_nl.columns, index=data_nl.index)
     
     fea_dist_method = 'Pearson'
     image_dist_method = 'Manhattan'
